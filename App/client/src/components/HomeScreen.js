@@ -33,7 +33,7 @@ class Home extends Component{
         return categories.map((category,index)=>{
             return(
                 <li className="collection-item" key={index}>
-                    <Link to={'categories/'+category.path}>{category.name}</Link>
+                    <Link to={'/'+category.path}>{category.name}</Link>
                 </li>
             )
         })
@@ -43,19 +43,28 @@ class Home extends Component{
         this.props.votePost(data,()=>{
         })
     }
-    _onPostEdith(post){
+    _onPostEdit(post){
         this.setState({postToEdit : post},()=>{
             this._showPostModal()
         });
     }
 
-    _onPostClick(id){
-        this.props.history.push('post/'+id)
+    _onPostClick(post){
+        this.props.history.push(`${post.category}/${post.id}`)
     }
 
     _renderPosts(){
         const { posts } = this.props;
-        if(!posts || posts.length<1) return null;
+        if(!posts || posts.length<1)return(
+            <div style={{display:'flex', justifyContent:'center', marginTop : 100}}>
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    <div>
+                        <h4>No posts to display !</h4>
+                    </div>
+                </div>
+            </div>
+        );
+
         const { filterSelected } = this.state;
         const filter = {
             0 : 'voteScore',
@@ -63,15 +72,21 @@ class Home extends Component{
         }
         return posts.sort((a, b)=>b[filter[filterSelected]] - a[filter[filterSelected]])
             .map(post=><Post 
-                        onClick={()=>this._onPostClick(post.id)} 
+                        onClick={()=>this._onPostClick(post)} 
                         postId={post.id} 
                         key={post.id} 
                         onPostVote={this._onPostVote.bind(this)} 
-                        onPostEdit={this._onPostEdith.bind(this)}/>)
+                        onPostEdit={this._onPostEdit.bind(this)}/>)
     }
 
     _showPostModal(){
-        this.setState({isOpen : true});
+        let { postToEdit } = this.state;
+        const { user } = this.props;
+
+        if(!postToEdit && user)
+            postToEdit = {author : user}
+            
+        this.setState({isOpen : true, postToEdit});
     }
     _hidePostModal(){
         this.setState({isOpen : false, postToEdit : null});
@@ -127,13 +142,14 @@ class Home extends Component{
     }
 }
 
-const mapStateToProps = ({categories, posts, form})=>{
+const mapStateToProps = ({categories, posts, form, user})=>{
 
     const _posts = posts.posts?Object.values(posts.posts):[];
 
     return{
         categories,
-        posts : _posts
+        posts : _posts,
+        user
     }
 }
 

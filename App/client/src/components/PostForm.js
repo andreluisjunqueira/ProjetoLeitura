@@ -15,7 +15,7 @@ class PostForm extends Component{
     }
     componentDidMount() {
 
-        const {editData} = this.props;
+        const {editData,user} = this.props;
         if(editData){
             this.setState({
                 id : editData.id,
@@ -34,15 +34,16 @@ class PostForm extends Component{
         if(this.state.id)
             fn = this.props.updatePost;    
 
-        fn(this.state,()=>{
-            this.setState({
-                title : '',
-                author:'',
-                category:'',
-                body:'',
-                id:''
-            },this.props.onSubmit)
-        })
+        if(this._postIsValid(this.state))
+            fn(this.state,()=>{
+                this.setState({
+                    title : '',
+                    author:'',
+                    category:'',
+                    body:'',
+                    id:''
+                },this.props.onSubmit)
+            })
     }
 
     _onFormChange(field, value){
@@ -51,8 +52,17 @@ class PostForm extends Component{
         })
     }
 
+    _postIsValid(post){
+        if(!post.title,!post.author,!post.category,!post.body){
+            alert('Fill out every form fields before to submit !');
+            return false;
+        }
+        return true;
+    }
+
     render(){
-        const { onCancel } = this.props;
+        const { onCancel, user } = this.props;
+        console.log('OUSER', user)
         return(
             <div className="row">
                 <form className="col s12" onSubmit={this._onSubmitForm.bind(this)}>
@@ -98,4 +108,6 @@ PostForm.defaultProps = {
     onSubmit : ()=>{}
 }
 
-export default connect(null,{ savePost,updatePost })(PostForm);
+export default connect(({user})=>{
+    return{user}
+},{ savePost,updatePost })(PostForm);

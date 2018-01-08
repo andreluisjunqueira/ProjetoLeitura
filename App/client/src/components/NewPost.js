@@ -10,6 +10,13 @@ class NewPost extends Component{
         body : ''
     }
 
+    componentDidMount(){
+       const { user } = this.props;
+
+       const author = user ? user : ''
+       this.setState({author})
+    }
+
     _onChange(field, value){
         this.setState({[field]:value});
     }
@@ -17,14 +24,24 @@ class NewPost extends Component{
     _onSubmit(){
         const {category}=this.props;
         const post = {...this.state, ...{category}};
-        this.props.savePost(post,()=>{
-            this.props.onCreatePost()
-            this.setState({
-                title : '',
-                author : '',
-                body : ''
+        
+        if(this._postIsValid(post))
+            this.props.savePost(post,()=>{
+                this.props.onCreatePost()
+                this.setState({
+                    title : '',
+                    author : '',
+                    body : ''
+                });
             });
-        });
+    }
+
+    _postIsValid(post){
+        if(!post.title || !post.author || !post.category || !post.body){
+            alert('Fill out every form fields before to submit !');
+            return false;
+        }
+        return true;
     }
 
     render(){
@@ -66,4 +83,4 @@ NewPost.defaultProps = {
     onCreatePost : ()=>{}
 }
  
-export default connect(null, {savePost})(NewPost)
+export default connect( ({user})=>({user}) , {savePost})(NewPost)

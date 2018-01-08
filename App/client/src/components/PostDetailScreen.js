@@ -17,7 +17,9 @@ class PostDetail extends Component{
     }
     componentDidMount(){
         const { id } = this.props.match.params;
-        this.setState({parentId : id});
+        const { user } = this.props;
+        let author = user ? user : ''
+        this.setState({parentId : id, author});
         this.props.getAllPosts();
         this.props.getByPost(id);
     }
@@ -65,14 +67,30 @@ class PostDetail extends Component{
     }
 
     render(){
-        const { comments } = this.props;
+        const { comments, error, history } = this.props;
         const { body, author, parentId } = this.state;
+        if(error)
+            return(
+                <div style={{display:'flex', justifyContent:'center', marginTop : 100}}>
+                    <div style={{display:'flex', flexDirection:'column'}}>
+                        <div>
+                            <h4>{error}</h4>
+                        </div>
+                        <div>
+                        <a style={{display:'flex',  cursor:'pointer'}} onClick={()=>history.push('/')}>
+                            <i className="material-icons" style={{fontSize : 22}}>arrow_back</i>
+                            Back
+                        </a>
+                        </div>
+                    </div>
+                </div>
+            )
         return (
             <div>
                 <BackButton {...this.props}/>
                 <Post 
                     postId={parentId}
-                    showControls={false}
+                    showControls={true}
                 />
                 <form onSubmit={this._onSubmitComment.bind(this)}>
                     <div className='row'>
@@ -99,9 +117,16 @@ class PostDetail extends Component{
     }
 }
 
-const mapStateToProps = ({comments})=>{
+const mapStateToProps = ({comments, posts, user},{history, ...rest})=>{
+    const { id } = rest.match.params;
+    let error = '';
+    if(!posts.posts[id])
+        error = 'This post is no longer available. :(' 
+
     return{
-        comments
+        comments,
+        error,
+        user
     }
 }
 export default connect(mapStateToProps,{ getAllPosts, newComment, getByPost, deleteComment, editComment, voteComment })(PostDetail);

@@ -41,6 +41,7 @@ export const deletePost = (id, callback)=>{
     return {
         type : DELETE_POST,
         id,
+        callback
     }
 }
 

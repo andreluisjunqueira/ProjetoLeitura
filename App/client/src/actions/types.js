@@ -22,3 +22,5 @@ export const GET_POSTS_BY_CATEGORY_SUCCESS = 'get_posts_by_category_success';
 export const GET_POSTS_BY_ID = 'get_posts_by_id';
 export const GET_POSTS_BY_ID_SUCCESS = 'get_posts_by_id_success';
 
+export const SET_USER = 'set_user';
+

@@ -47,10 +47,15 @@ const votePost = (action$)=>{
 
 const deletePost = (action$)=>{
     return action$.ofType(DELETE_POST)
-           .mergeMap(({id})=>requestApi.posts.deletePost(id))
-           .mapTo({
-               type : GET_POSTS
-           });
+        .map(({callback,id})=>({callback,id}))
+        .mergeMap(({ callback, id })=>{
+            return requestApi.posts.deletePost(id).then(()=>{
+                return callback();
+            })
+        })
+        .mapTo({
+            type : GET_POSTS
+        });
 
 }
 
