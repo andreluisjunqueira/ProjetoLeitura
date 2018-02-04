@@ -5,12 +5,15 @@ import { getByCategory } from '../actions/postsAction';
 import Post from './Post';
 import NewPost from './NewPost';
 import BackButton from './common/BackButton';
+import FiterSelector from './filterSelector';
 
 class Categories extends Component{
 
     state = {
-        category : ''
+        category : '',
+        filterSelected : 0
     }
+
     _getPosts(category){
         this.props.getByCategory(category);
     }
@@ -20,16 +23,38 @@ class Categories extends Component{
         this._getPosts(category);
     }
 
+    _onPostClick(post){
+        this.props.history.push(`${post.category}/${post.id}`)
+    }
+
     _renderPosts(){
         const { posts } = this.props;
-        return !posts?null:posts.sort((a, b)=>b.voteScore - a.voteScore)
-        .map((post ,index)=><Post postId={post.id} key={index} showControls={false}/>)
+        const { filterSelected } = this.state;
+        const filter = {
+            0 : 'voteScore',
+            1 : 'timestamp'
+        }
+
+        return !posts?null:posts.sort((a, b)=>b[filter[filterSelected]] - a[filter[filterSelected]])
+                                .map((post)=><Post 
+                                                onClick={()=>this._onPostClick(post)} 
+                                                postId={post.id} 
+                                                key={post.id} 
+                                                showControls={true}/>)
+    }
+
+    _onSort(filterSelected){
+        this.setState({filterSelected})
     }
 
     render() {
         const { category } = this.state
         return (
             <div>
+                <FiterSelector 
+                    onSelect={this._onSort.bind(this)} 
+                    selected={this.state.filterSelected}
+                />
                 <div className="row">
                     <div className="col s11">
                         <h3>{this.state.category.toUpperCase()}</h3>
